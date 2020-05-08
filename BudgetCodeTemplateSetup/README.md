@@ -14,7 +14,7 @@ This folder contains a Postman Collection to show the process of budget code tem
 ![Collection](Img/collection.png)
 
 ## Demonstration
-[![https://youtu.be/UCRWpUwLifo](http://img.youtube.com/vi/UCRWpUwLifo/0.jpg)](https://youtu.be/UCRWpUwLifo "BIM 360 Cost Management tutorial")
+TBD
 
 ## Preparation before you begin:
 - [Create Forge App, get access to a BIM 360 Account](https://forge.autodesk.com/en/docs/bim360/v1/tutorials/getting-started/get-access-to-account/)
@@ -22,7 +22,7 @@ This folder contains a Postman Collection to show the process of budget code tem
 
 ## Instructions to run the Postman tutorial are as below:
 
-**Please watch the [Video](https://youtu.be/UCRWpUwLifo) for the detail workflow, or follow the steps:**
+**Please watch the [Video](https://youtu.be/tbd) for the detail workflow, or follow the steps:**
 
 ### Setup Postman environment and Authorization:
 - Import Postman collection, and setup the following environment vialables:
