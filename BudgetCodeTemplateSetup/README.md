@@ -27,10 +27,10 @@ This folder contains a Postman Collection to show the process of budget code tem
 ### Setup Postman environment and Authorization:
 - Import Postman collection, and setup the following environment vialables:
     - in Step 0, Pre-request Script: 
-        1. Forge Client Key, please change to your Forge Client Id and Secret.
-        3. Change the project name to the correct one.
-        4. Base domain, should be https://developer.api.autodesk.com/ by default.
-        5. Initialize segment_index to 1 by default.
+        - Forge Client Key, please change to your Forge Client Id and Secret.
+        - Change the project name to the correct one.
+        - Base domain, should be https://developer.api.autodesk.com/ by default.
+        - Initialize segment_index to 1 by default.
 
 - Please add the Authorization for the collection, click **Edit Collection**, go to **Authorization** tab, make sure to use **OAuth 2.0** to get a 3 legged token, use it in the **Request Headers**.
 ![3leggedToken](Img/3leggedToken.png)
@@ -39,12 +39,11 @@ This folder contains a Postman Collection to show the process of budget code tem
     - Access Token URL: https://developer.api.autodesk.com/authentication/v1/gettoken
 
 ### Tutorials of BIM360 Cost Budget Code Template Setup workflow
-- Step 0: Reset the environment variables
-Reset the following environment variables:
-    1. Forge Client Key, please change to your Forge Client Id and Secret.
-    2. Project name, please change to the correct project name which you want to work with.
-    3. Base domain, should be https://developer.api.autodesk.com/ by default.
-    4. Segment index, will be used to create multiple budget segments, should be 1 by default.
+- Step 0: Reset the following environment variables:
+    - Forge Client Key, please change to your Forge Client Id and Secret.
+    - Project name, please change to the correct project name which you want to work with.
+    - Base domain, should be https://developer.api.autodesk.com/ by default.
+    - Segment index, will be used to create multiple budget segments, should be 1 by default.
 - Step 1: List all the Hubs, and save **hub_id** for the 1st BIM360 Hub, also save **account_id** (Data Management API)
 - Step 2: List all the projects in the BIM360 Hub, then get and save **project_id** for the specified **project_name**.
 - Step 3: Get the information of the specified BIM360 project, and save **cost_container_id** for the Cost Container(Data Management API).
