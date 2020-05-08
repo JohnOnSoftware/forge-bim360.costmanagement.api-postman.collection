@@ -1,8 +1,9 @@
 # BIM360 Cost Management API Documentation Postman Collection Git Repo
 
-This repository contains 2 API collections as follow for different purpose which could help you understand the usage of BIM 360 Cost Managment API:
+This repository contains 3 API collections as follow for different purpose which could help you understand the usage of BIM 360 Cost Managment API:
 
 - [BIM360 Cost Management Tutorial](CostTutorial), includes a set of API working as tutorial of cost workflow.
+- [BIM360 Cost Budget Code Template Setup Tutorial](BudgetCodeTemplateSetup), includes a set of API working as tutorial to setup Budget Code Template, note this is still in private beta.
 - [BIM360 Cost Management API List](EndpointList), includes cost API list that helps quick test or verify each endpoint. 
 
 
