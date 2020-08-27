@@ -13,17 +13,12 @@
 This folder contains a Postman Collection to show the process of budget code template setup. It will fistly delete any budget segments if existing, then create 5 new budget segments and import budget segment values accordingly.
 ![Collection](Img/collection.png)
 
-## Demonstration
-TBD
 
 ## Preparation before you begin:
 - [Create Forge App, get access to a BIM 360 Account](https://forge.autodesk.com/en/docs/bim360/v1/tutorials/getting-started/get-access-to-account/)
 - [Create BIM360 project, activate Cost Management module](https://help.autodesk.com/view/BIM360D/ENU/?guid=BIM360D_Cost_Management_getting_started_with_cost_management_html);
 
 ## Instructions to run the Postman tutorial are as below:
-
-**Please watch the [Video](https://youtu.be/tbd) for the detail workflow, or follow the steps:**
-
 ### Setup Postman environment and Authorization:
 - Import Postman collection, and setup the following environment vialables:
     - in Step 0, Pre-request Script: 
