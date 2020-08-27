@@ -1,0 +1,736 @@
+{
+	"info": {
+		"_postman_id": "2ba53f2c-3485-48c2-abe3-fcd1c61e7879",
+		"name": "BIM360 Cost Management budget code setup tutorial(Private Beta)",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Step 0: Reset the environment variables",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "6e50751b-4fdd-49ae-9395-a72f29474633",
+						"exec": [
+							"pm.test(\"Status code is 200\", function () { pm.response.to.have.status(200); });",
+							"",
+							""
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "8a855caa-cf9a-4a1c-b5a1-1e4bc3312259",
+						"exec": [
+							"pm.environment.clear();",
+							"",
+							"// Please change the following variables according to your account setting",
+							"// your Forge App key",
+							"pm.environment.set(\"client_id\",     \"your_forge_client_id\");",
+							"pm.environment.set(\"client_secret\", \"your_forge_client_secret\");",
+							"",
+							"// Change to the specified project name",
+							"pm.environment.set(\"project_name\", \"Change to your project name\");",
+							"",
+							"pm.environment.set(\"base_domain\", \"https://developer.api.autodesk.com/\");",
+							"pm.environment.set(\"segment_index\", \"1\");",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "VIEW",
+				"header": [],
+				"url": {
+					"raw": "{{base_domain}}/health",
+					"host": [
+						"{{base_domain}}"
+					],
+					"path": [
+						"health"
+					]
+				},
+				"description": "Reset the following environment variables:\n1. Forge Client Key, please change to your Forge Client Id and Secret.\n2. Project name, please change to the correct project name which you want to work with.\n3. Base domain, should be https://developer.api.autodesk.com/ by default.\n4. Segment index, will be used to create multiple budget segments, should be 1 by default."
+			},
+			"response": []
+		},
+		{
+			"name": "Step 1: Find all hubs within your account",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "0400edee-9407-4539-a629-7f92f73ce24e",
+						"exec": [
+							"pm.test(\"Status code is 200\", function () { pm.response.to.have.status(200); });",
+							"",
+							"",
+							"// setup the environment variable \"hub_id\" and \"account_id\" with the 1st BIM360 hub",
+							"var responseBody = JSON.parse(responseBody);",
+							"var bim_hub = responseBody.data.find( hub =>  hub.id.indexOf(\"b.\") !== -1);",
+							"if(bim_hub !== null ){",
+							"    ",
+							"    pm.environment.set(\"hub_id\",     bim_hub.id);",
+							"    pm.environment.set(\"account_id\", bim_hub.id.split('b.').join(''));",
+							"}"
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "8cfa97b8-c4f1-4a80-90e2-50e3e7a1dadb",
+						"exec": [
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{base_domain}}/project/v1/hubs",
+					"host": [
+						"{{base_domain}}"
+					],
+					"path": [
+						"project",
+						"v1",
+						"hubs"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Step 2: Find projects within a BIM360 hub",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "e9eaa388-e0e3-4a45-88b1-447388b8b427",
+						"exec": [
+							""
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"id": "d8af22df-95cf-4ba1-9858-aa483c84b543",
+						"exec": [
+							"pm.test(\"Status code is 200\", function () { pm.response.to.have.status(200); });",
+							"",
+							"// find the specified project and setup the environment variable \"project_id\"",
+							"var project_name =  pm.environment.get(\"project_name\");",
+							"var responseBody = JSON.parse(responseBody);",
+							"var project = responseBody.data.find(d => d.attributes.name == project_name)",
+							"if( project ){",
+							"    postman.setEnvironmentVariable(\"project_id\", project.id);",
+							"}"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{base_domain}}/project/v1/hubs/:hub_id/projects?page[limit]=200",
+					"host": [
+						"{{base_domain}}"
+					],
+					"path": [
+						"project",
+						"v1",
+						"hubs",
+						":hub_id",
+						"projects"
+					],
+					"query": [
+						{
+							"key": "page[limit]",
+							"value": "200"
+						}
+					],
+					"variable": [
+						{
+							"key": "hub_id",
+							"value": "{{hub_id}}"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Step 3: Get the project and setup cost container id",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "25d5a645-4c36-4dd6-82a9-3c26136f9985",
+						"exec": [
+							"pm.test(\"Status code is 200\", function () { pm.response.to.have.status(200); });",
+							"",
+							"// setup the environment variable \"cost_container_id\"",
+							"var responseBody = JSON.parse(responseBody);",
+							"postman.setEnvironmentVariable(\"cost_container_id\", responseBody.data.relationships.cost.data.id);",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{base_domain}}/project/v1/hubs/:hub_id/projects/:project_id",
+					"host": [
+						"{{base_domain}}"
+					],
+					"path": [
+						"project",
+						"v1",
+						"hubs",
+						":hub_id",
+						"projects",
+						":project_id"
+					],
+					"variable": [
+						{
+							"key": "hub_id",
+							"value": "{{hub_id}}"
+						},
+						{
+							"key": "project_id",
+							"value": "{{project_id}}"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Step 4: GET the unique budget code template",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "cfca5644-3012-4e47-af4d-9e20bf186a36",
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"// setup the environment variable \"template_id\", there is always only one budget code template",
+							"var responseBody = JSON.parse(responseBody);",
+							"postman.setEnvironmentVariable(\"template_id\", responseBody[0].id);",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer {{access_token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "{{base_domain}}cost/v1/containers/:cost_container_id/templates",
+					"host": [
+						"{{base_domain}}cost"
+					],
+					"path": [
+						"v1",
+						"containers",
+						":cost_container_id",
+						"templates"
+					],
+					"variable": [
+						{
+							"key": "cost_container_id",
+							"value": "{{cost_container_id}}"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Iterate from Step 5 ~ Step 6, delete all the existing budget code segments",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "d3a9e2af-0bc3-4d81-9bc4-9f4fa42fc1fe",
+						"exec": [
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "VIEW",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "{{base_domain}}/health",
+					"host": [
+						"{{base_domain}}"
+					],
+					"path": [
+						"health"
+					]
+				},
+				"description": "Use different \"changeOrder_type\" to create differnt change order and execute actions on that. You can create different change order typs(Pco, Rfq, Rco, Oco, Sco) by following the workflow."
+			},
+			"response": []
+		},
+		{
+			"name": "Step 5: GET budget code segment list",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "cfca5644-3012-4e47-af4d-9e20bf186a36",
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"// setup the environment variable \"segment_id\"",
+							"var responseBody = JSON.parse(responseBody);",
+							"",
+							"// create budget code segment if non existed",
+							"if(responseBody.results.length === 0  ){",
+							"    postman.setNextRequest('Step 7: Create a budget code segment');",
+							"}else{// delete current budget code segment if any",
+							"    postman.setEnvironmentVariable(\"segment_id\", responseBody.results[0].id);",
+							"}"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer {{access_token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "{{base_domain}}cost/v1/containers/:cost_container_id/templates/:template_id/segments",
+					"host": [
+						"{{base_domain}}cost"
+					],
+					"path": [
+						"v1",
+						"containers",
+						":cost_container_id",
+						"templates",
+						":template_id",
+						"segments"
+					],
+					"variable": [
+						{
+							"key": "cost_container_id",
+							"value": "{{cost_container_id}}"
+						},
+						{
+							"key": "template_id",
+							"value": "{{template_id}}"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Step 6: Delete budget code segment if there is any",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "cfca5644-3012-4e47-af4d-9e20bf186a36",
+						"exec": [
+							"pm.test(\"Status code is 204\", function () {",
+							"    pm.response.to.have.status(204);",
+							"});",
+							"",
+							"postman.setNextRequest('Step 5: GET budget code segment list');",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "DELETE",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer {{access_token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "{{base_domain}}cost/v1/containers/:cost_container_id/templates/:template_id/segments/:segment_id",
+					"host": [
+						"{{base_domain}}cost"
+					],
+					"path": [
+						"v1",
+						"containers",
+						":cost_container_id",
+						"templates",
+						":template_id",
+						"segments",
+						":segment_id"
+					],
+					"variable": [
+						{
+							"key": "cost_container_id",
+							"value": "{{cost_container_id}}"
+						},
+						{
+							"key": "template_id",
+							"value": "{{template_id}}"
+						},
+						{
+							"key": "segment_id",
+							"value": "{{segment_id}}"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Iterate from Step 7 ~ Step 9, create 5 budget code segments and import values",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "d3a9e2af-0bc3-4d81-9bc4-9f4fa42fc1fe",
+						"exec": [
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "VIEW",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "{{base_domain}}/health",
+					"host": [
+						"{{base_domain}}"
+					],
+					"path": [
+						"health"
+					]
+				},
+				"description": "Create 5 budget code segment with name \"Segment code sample\", and then update the name to \"Segment code sample modified X\""
+			},
+			"response": []
+		},
+		{
+			"name": "Step 7: Create a budget code segment",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "cfca5644-3012-4e47-af4d-9e20bf186a36",
+						"exec": [
+							"",
+							"pm.test(\"Successful POST request\", function () {",
+							"    pm.expect(pm.response.code).to.be.oneOf([201,202]);",
+							"});",
+							"",
+							"var data = JSON.parse(responseBody);",
+							"postman.setEnvironmentVariable(\"segment_id\", data.id);",
+							""
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "666caf1f-9f8e-41eb-a86e-9d6e3e5da0f6",
+						"exec": [
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer {{access_token}}"
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"name\": \"Segment code sample {{segment_index}}\",\n  \"type\": \"code\",\n  \"delimiter\": \"none\",\n  \"length\": 5,\n  \"position\": 0,\n  \"sampleCode\": \"12345\"\n}"
+				},
+				"url": {
+					"raw": "{{base_domain}}cost/v1/containers/:cost_container_id/templates/:template_id/segments",
+					"host": [
+						"{{base_domain}}cost"
+					],
+					"path": [
+						"v1",
+						"containers",
+						":cost_container_id",
+						"templates",
+						":template_id",
+						"segments"
+					],
+					"variable": [
+						{
+							"key": "cost_container_id",
+							"value": "{{cost_container_id}}"
+						},
+						{
+							"key": "template_id",
+							"value": "{{template_id}}"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Step 8: Update the budget code segment",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "cfca5644-3012-4e47-af4d-9e20bf186a36",
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "PATCH",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer {{access_token}}"
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"name\": \"Segment code sample modified {{segment_index}}\",\n\t\"sampleCode\": \"54321\"\n}"
+				},
+				"url": {
+					"raw": "{{base_domain}}cost/v1/containers/:cost_container_id/templates/:template_id/segments/:segment_id",
+					"host": [
+						"{{base_domain}}cost"
+					],
+					"path": [
+						"v1",
+						"containers",
+						":cost_container_id",
+						"templates",
+						":template_id",
+						"segments",
+						":segment_id"
+					],
+					"variable": [
+						{
+							"key": "cost_container_id",
+							"value": "{{cost_container_id}}"
+						},
+						{
+							"key": "template_id",
+							"value": "{{template_id}}"
+						},
+						{
+							"key": "segment_id",
+							"value": "{{segment_id}}"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Step 9: Import a couple of segment values",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "cfca5644-3012-4e47-af4d-9e20bf186a36",
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"",
+							"var segmentIndex = parseInt(pm.environment.get(\"segment_index\")) + 1;",
+							"if( segmentIndex > 5 ){",
+							"    postman.setNextRequest('Stop the collection');",
+							"}else{",
+							"    postman.setEnvironmentVariable(\"segment_index\", segmentIndex);",
+							"    postman.setNextRequest('Step 7: Create a budget code segment');",
+							"}",
+							"",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer {{access_token}}"
+					},
+					{
+						"key": "Content-Type",
+						"type": "text",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"data\": [\n    {\n      \"segmentId\": \"{{segment_id}}\",\n      \"parentId\": null,\n      \"code\": \"20100\",\n      \"description\": \"test201\"\n    },\n\t{\n      \"segmentId\": \"{{segment_id}}\",\n      \"parentId\": null,\n      \"code\": \"20300\",\n      \"description\": \"test208\"\n    }\n  ],\n\t\"append\": false\n\n  \n}"
+				},
+				"url": {
+					"raw": "{{base_domain}}cost/v1/containers/:cost_container_id/segments/:segment_id/values:import",
+					"host": [
+						"{{base_domain}}cost"
+					],
+					"path": [
+						"v1",
+						"containers",
+						":cost_container_id",
+						"segments",
+						":segment_id",
+						"values:import"
+					],
+					"variable": [
+						{
+							"key": "cost_container_id",
+							"value": "{{cost_container_id}}"
+						},
+						{
+							"key": "segment_id",
+							"value": "{{segment_id}}"
+						}
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"auth": {
+		"type": "oauth2",
+		"oauth2": [
+			{
+				"key": "accessToken",
+				"value": "eyJhbGciOiJIUzI1NiIsImtpZCI6Imp3dF9zeW1tZXRyaWNfa2V5In0.eyJzY29wZSI6WyJkYXRhOndyaXRlIiwiZGF0YTpyZWFkIiwiYWNjb3VudDpyZWFkIiwiYWNjb3VudDp3cml0ZSJdLCJjbGllbnRfaWQiOiJvR1hFTXl6aUFDVkpmTzBLSWdkUWgzVkRMSHhXbmtzTyIsImdyYW50X2lkIjoiN3JGNHNLSXNPUHc4NlNCRjRyNGJwbkhTQm83YXZob0MiLCJhdWQiOiJodHRwczovL2F1dG9kZXNrLmNvbS9hdWQvand0ZXhwNjAiLCJqdGkiOiJOWUpOajlnU01YT05TYWxJSUNKT1ZDWnRhTWNpMEw4RTRSb0hDSEtGNmFFMnpDOHBubEZpdUNCTUJkOHJlRlNhIiwidXNlcmlkIjoiNFY0V0tRSkdHUTdOIiwiZXhwIjoxNTg5MzU3ODkxfQ.fRCyyOHnk5OIIVncrmXWlc2t5h3S68dZ54SUCbImcFE",
+				"type": "string"
+			},
+			{
+				"key": "tokenType",
+				"value": "Bearer",
+				"type": "string"
+			},
+			{
+				"key": "addTokenTo",
+				"value": "header",
+				"type": "string"
+			}
+		]
+	},
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"id": "68784e41-ecdb-4e6a-bebd-2cd99afba7b8",
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"id": "35c9a292-3e72-4b65-8b4f-368531309333",
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"protocolProfileBehavior": {}
+}
